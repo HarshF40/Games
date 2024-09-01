@@ -172,14 +172,14 @@ ifBlank:
   } else {
 
 /////Reset Blank///////////////
-  for(int i=0;i<20;i++){     //
-    for(int j=0;j<50;j++){   //
-      if(arr[i][j] == ' ')   //
-        arr[i][j] = '^';     //
-      else                   //
-        continue;            //
-    }                        //
-  }                          //
+//  for(int i=0;i<20;i++){   //
+//    for(int j=0;j<50;j++){ //
+//    if(arr[i][j] == ' ')   //
+//    arr[i][j] = '^';       //
+//      els                  //
+//        continue;          //
+//    }                      //
+//  }                        //
 ///////////////////////////////
 
     goto ifBlank;
