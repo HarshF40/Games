@@ -51,13 +51,13 @@ game:
 //////////////////////////////////
 
 ////Generate Coins////////////////////////////////////////////
-  int row,column,ten_count=0;                               //
-  while(ten_count<30){                                      //
+  int row,column,Ccount=0;                                  //
+  while(Ccount<30){                                         //
     row = genCoinRow();                                     //
     column = genCoinCol();                                  //
     if((arr[row][column]!='@') && (arr[row][column]!='$')){ //
       arr[row][column] = '$';                               //
-      ten_count++;                                          //
+      Ccount++;                                             //
     } else {                                                //
       continue;                                             //
     }                                                       //
@@ -80,6 +80,22 @@ game:
 
 
   do{
+
+////Generate Blank////////////////////////////////////////////
+  int row,column,Bcount=0;                                  //
+  while(Bcount<30){                                         //
+    row = genCoinRow(); //used Random Coin generator        //
+    column = genCoinCol();    // "                          //
+    if((arr[row][column]!='@') && (arr[row][column]!='$')){ //
+      arr[row][column] = ' ';                               //
+      Bcount++;                                             //
+    } else {                                                //
+      continue;                                             //
+    }                                                       //
+  }                                                         //
+//////////////////////////////////////////////////////////////
+
+ifBlank:
 
     move(0,0);
     refresh();
@@ -110,7 +126,7 @@ game:
   
   R{
 
-    if((pos.y)>0){
+    if(((pos.y)>0) && (arr[(pos.y)-1][(pos.x)]!=' ')){
       if(arr[(pos.y)-1][pos.x] == '$'){
         score++;
       }
@@ -118,10 +134,10 @@ game:
     arr[pos.y][pos.x] = '^';
     (pos.y)--;
     } else {
-      continue;
+      goto ifBlank;
     }
   } else N {
-    if((pos.y)<19){
+    if((pos.y)<19 && (arr[(pos.y)+1][(pos.x)]!=' ')){
       if(arr[(pos.y)+1][pos.x] == '$'){
         score++;
       }
@@ -129,10 +145,10 @@ game:
     arr[pos.y][pos.x] = '^';
     (pos.y)++;
     } else {
-      continue;
+      goto ifBlank;
     }
   } else D {
-    if((pos.x)>0){
+    if((pos.x)>0 && (arr[(pos.y)][(pos.x)-1]!=' ')){
       if(arr[pos.y][(pos.x)-1] == '$'){
         score++;
       }
@@ -140,10 +156,10 @@ game:
     arr[pos.y][pos.x] = '^';
     (pos.x)--;
     } else {
-      continue;
+      goto ifBlank;
     }
   } else J {
-    if((pos.x)<49){
+    if((pos.x)<49 && (arr[(pos.y)][(pos.x)+1]!=' ')){
       if(arr[pos.y][(pos.x)+1] == '$'){
         score++;
       }
@@ -151,11 +167,35 @@ game:
     arr[pos.y][pos.x] = '^';
     (pos.x)++;
     } else {
-      continue;
+      goto ifBlank;
     }
   } else {
-    continue;
+
+/////Reset Blank///////////////
+  for(int i=0;i<20;i++){     //
+    for(int j=0;j<50;j++){   //
+      if(arr[i][j] == ' ')   //
+        arr[i][j] = '^';     //
+      else                   //
+        continue;            //
+    }                        //
+  }                          //
+///////////////////////////////
+
+    goto ifBlank;
+
   }
+/////Reset Blank///////////////
+  for(int i=0;i<20;i++){     //
+    for(int j=0;j<50;j++){   //
+      if(arr[i][j] == ' ')   //
+        arr[i][j] = '^';     //
+      else                   //
+        continue;            //
+    }                        //
+  }                          //
+///////////////////////////////
+
 }while(score<30);
 
 
