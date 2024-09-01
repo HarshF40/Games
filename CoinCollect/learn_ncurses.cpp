@@ -4,17 +4,17 @@
 #include<random>
 #include<cstdlib>
 
-#define W if(ch == 'w' || ch == 'W')
-#define S if(ch == 's' || ch == 'S')
-#define A if(ch == 'a' || ch == 'A')
-#define D if(ch == 'd' || ch == 'D')
+#define R if(ch == 'r' || ch == 'R') //Up
+#define N if(ch == 'n' || ch == 'N') //Down
+#define D if(ch == 'd' || ch == 'D') //Left
+#define J if(ch == 'j' || ch == 'J') //Right
 
 struct spritePos{
   int y;
   int x;
 };
 
-unsigned int genCoin(){
+unsigned int genCoinRow(){
   std::random_device rd{};
   std::seed_seq ss{static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count()),rd(),rd(),rd(),rd(),rd(),rd(),rd()};
   std::mt19937 mt{ss};
@@ -23,16 +23,27 @@ unsigned int genCoin(){
 }
 
 
+unsigned int genCoinCol(){
+  std::random_device rd{};
+  std::seed_seq ss{static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count()),rd(),rd(),rd(),rd(),rd(),rd(),rd()};
+  std::mt19937 mt{ss};
+  std::uniform_int_distribution genPos{0,49};
+  return genPos(mt);
+}
+
+
 int main(){
 
+game:
+
   spritePos pos{0,0};
-  char arr[20][20];
+  char arr[20][50];
   char ch;
   int score=0;
 
 ///Generate Base and add sprite///
   for(int i=0;i<20;i++){        //
-    for(int j=0;j<20;j++){      //
+    for(int j=0;j<50;j++){      //
       arr[i][j] = '^';          //
     }                           //
   }                             //
@@ -41,9 +52,9 @@ int main(){
 
 ////Generate Coins////////////////////////////////////////////
   int row,column,ten_count=0;                               //
-  while(ten_count<15){                                      //
-    row = genCoin();                                        //
-    column = genCoin();                                     //
+  while(ten_count<30){                                      //
+    row = genCoinRow();                                     //
+    column = genCoinCol();                                  //
     if((arr[row][column]!='@') && (arr[row][column]!='$')){ //
       arr[row][column] = '$';                               //
       ten_count++;                                          //
@@ -75,7 +86,7 @@ int main(){
 
     for(int i=0;i<20;i++){
       printw("\n");
-      for(int j=0;j<20;j++){
+      for(int j=0;j<50;j++){
         if(arr[i][j]=='@'){
           attron(COLOR_PAIR(1));
           printw("%2c",arr[i][j]);
@@ -93,11 +104,11 @@ int main(){
     }
 
     printw("\n\nEnter: ");
-    printw("\nScore: %d/15\n",score);
+    printw("\nScore: %d/30\n",score);
 
   ch = getch();
   
-  W{
+  R{
 
     if((pos.y)>0){
       if(arr[(pos.y)-1][pos.x] == '$'){
@@ -109,7 +120,7 @@ int main(){
     } else {
       continue;
     }
-  } else S {
+  } else N {
     if((pos.y)<19){
       if(arr[(pos.y)+1][pos.x] == '$'){
         score++;
@@ -120,7 +131,7 @@ int main(){
     } else {
       continue;
     }
-  } else A {
+  } else D {
     if((pos.x)>0){
       if(arr[pos.y][(pos.x)-1] == '$'){
         score++;
@@ -131,8 +142,8 @@ int main(){
     } else {
       continue;
     }
-  } else D {
-    if((pos.x)<19){
+  } else J {
+    if((pos.x)<49){
       if(arr[pos.y][(pos.x)+1] == '$'){
         score++;
       }
@@ -145,7 +156,7 @@ int main(){
   } else {
     continue;
   }
-}while(score<15);
+}while(score<30);
 
 
   clear();
@@ -155,7 +166,7 @@ int main(){
 
     for(int i=0;i<20;i++){
       printw("\n");
-      for(int j=0;j<20;j++){
+      for(int j=0;j<50;j++){
         if(arr[i][j]=='@'){
           attron(COLOR_PAIR(1));
           printw("%2c",arr[i][j]);
@@ -178,6 +189,14 @@ int main(){
 
 
   endwin(); 
+
+  system("clear");
+  char choice;
+  std::cout<<"\nQuit(q)/Play Again(p): ";
+  std::cin>>choice;
+
+  if(choice == 'p')
+  goto game;
 
   return 0;
 }
