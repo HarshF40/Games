@@ -30,24 +30,30 @@ int main(){
   char ch;
   int score=0;
 
-  for(int i=0;i<20;i++){
-    for(int j=0;j<20;j++){
-      arr[i][j] = '^';
-    }
-  }
-  arr[pos.y][pos.x] = '@';
+///Generate Base and add sprite///
+  for(int i=0;i<20;i++){        //
+    for(int j=0;j<20;j++){      //
+      arr[i][j] = '^';          //
+    }                           //
+  }                             //
+  arr[pos.y][pos.x] = '@';      //
+//////////////////////////////////
 
-  int row,column,ten_count=0;
-  while(ten_count<15){
-    row = genCoin();
-    column = genCoin();
-    if((arr[row][column]!='@') && (arr[row][column]!='$')){
-      arr[row][column] = '$';
-      ten_count++;
-    } else {
-      continue;
-    }
-  }
+////Generate Coins////////////////////////////////////////////
+  int row,column,ten_count=0;                               //
+  while(ten_count<15){                                      //
+    row = genCoin();                                        //
+    column = genCoin();                                     //
+    if((arr[row][column]!='@') && (arr[row][column]!='$')){ //
+      arr[row][column] = '$';                               //
+      ten_count++;                                          //
+    } else {                                                //
+      continue;                                             //
+    }                                                       //
+  }                                                         //
+//////////////////////////////////////////////////////////////
+
+
 
 
 
