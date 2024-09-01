@@ -18,7 +18,7 @@ unsigned int genCoin(){
   std::random_device rd{};
   std::seed_seq ss{static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count()),rd(),rd(),rd(),rd(),rd(),rd(),rd()};
   std::mt19937 mt{ss};
-  std::uniform_int_distribution genPos{0,9};
+  std::uniform_int_distribution genPos{0,19};
   return genPos(mt);
 }
 
@@ -26,19 +26,19 @@ unsigned int genCoin(){
 int main(){
 
   spritePos pos{0,0};
-  char arr[10][10];
+  char arr[20][20];
   char ch;
   int score=0;
 
-  for(int i=0;i<10;i++){
-    for(int j=0;j<10;j++){
+  for(int i=0;i<20;i++){
+    for(int j=0;j<20;j++){
       arr[i][j] = '^';
     }
   }
   arr[pos.y][pos.x] = '@';
 
   int row,column,ten_count=0;
-  while(ten_count<10){
+  while(ten_count<15){
     row = genCoin();
     column = genCoin();
     if((arr[row][column]!='@') && (arr[row][column]!='$')){
@@ -67,27 +67,27 @@ int main(){
     move(0,0);
     refresh();
 
-    for(int i=0;i<10;i++){
+    for(int i=0;i<20;i++){
       printw("\n");
-      for(int j=0;j<10;j++){
+      for(int j=0;j<20;j++){
         if(arr[i][j]=='@'){
           attron(COLOR_PAIR(1));
-          printw("%c",arr[i][j]);
+          printw("%2c",arr[i][j]);
           attroff(COLOR_PAIR(1));
         } else if(arr[i][j] == '$'){
           attron(COLOR_PAIR(3));
-          printw("%c",arr[i][j]);
+          printw("%2c",arr[i][j]);
           attroff(COLOR_PAIR(3));
         } else {
           attron(COLOR_PAIR(2));
-          printw("%c",arr[i][j]);
+          printw("%2c",arr[i][j]);
           attroff(COLOR_PAIR(2));
         }
       }
     }
 
     printw("\n\nEnter: ");
-    printw("\nScore: %d/10\n",score);
+    printw("\nScore: %d/15\n",score);
 
   ch = getch();
   
@@ -104,7 +104,7 @@ int main(){
       continue;
     }
   } else S {
-    if((pos.y)<9){
+    if((pos.y)<19){
       if(arr[(pos.y)+1][pos.x] == '$'){
         score++;
       }
@@ -126,7 +126,7 @@ int main(){
       continue;
     }
   } else D {
-    if((pos.x)<9){
+    if((pos.x)<19){
       if(arr[pos.y][(pos.x)+1] == '$'){
         score++;
       }
@@ -139,7 +139,7 @@ int main(){
   } else {
     continue;
   }
-}while(score<10);
+}while(score<15);
 
 
   clear();
@@ -147,20 +147,20 @@ int main(){
     refresh();
 
 
-    for(int i=0;i<10;i++){
+    for(int i=0;i<20;i++){
       printw("\n");
-      for(int j=0;j<10;j++){
+      for(int j=0;j<20;j++){
         if(arr[i][j]=='@'){
           attron(COLOR_PAIR(1));
-          printw("%c",arr[i][j]);
+          printw("%2c",arr[i][j]);
           attroff(COLOR_PAIR(1));
         } else if(arr[i][j] == '$'){
           attron(COLOR_PAIR(3));
-          printw("%c",arr[i][j]);
+          printw("%2c",arr[i][j]);
           attroff(COLOR_PAIR(3));
         } else {
           attron(COLOR_PAIR(2));
-          printw("%c",arr[i][j]);
+          printw("%2c",arr[i][j]);
           attroff(COLOR_PAIR(2));
         }
       }
