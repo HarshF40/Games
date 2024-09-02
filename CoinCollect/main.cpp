@@ -83,7 +83,7 @@ game:
 
 ////Generate Blank////////////////////////////////////////////
   int row,column,Bcount=0;                                  //
-  while(Bcount<30){                                         //
+  while(Bcount<50){                                         //
     row = genCoinRow(); //used Random Coin generator        //
     column = genCoinCol();    // "                          //
     if((arr[row][column]!='@') && (arr[row][column]!='$')){ //
