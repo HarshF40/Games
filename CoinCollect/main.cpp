@@ -6,7 +6,9 @@
 
 int main(){
 
-game:
+  char choice;
+
+  do{
 
   spritePos pos{0,0};
   char arr[20][50];
@@ -203,12 +205,10 @@ ifBlank:
   endwin(); 
 
   system("clear");
-  char choice;
   std::cout<<"\nQuit(q)/Play Again(p): ";
   std::cin>>choice;
 
-  if(choice == 'p')
-  goto game;
+  }while(choice != 'q');
 
   return 0;
 }
