@@ -2,35 +2,7 @@
 #include<ncurses.h>
 #include<chrono>
 #include<random>
-#include<cstdlib>
-
-#define R if(ch == 'r' || ch == 'R') //Up
-#define N if(ch == 'n' || ch == 'N') //Down
-#define D if(ch == 'd' || ch == 'D') //Left
-#define J if(ch == 'j' || ch == 'J') //Right
-
-struct spritePos{
-  int y;
-  int x;
-};
-
-unsigned int genCoinRow(){
-  std::random_device rd{};
-  std::seed_seq ss{static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count()),rd(),rd(),rd(),rd(),rd(),rd(),rd()};
-  std::mt19937 mt{ss};
-  std::uniform_int_distribution genPos{0,19};
-  return genPos(mt);
-}
-
-
-unsigned int genCoinCol(){
-  std::random_device rd{};
-  std::seed_seq ss{static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count()),rd(),rd(),rd(),rd(),rd(),rd(),rd()};
-  std::mt19937 mt{ss};
-  std::uniform_int_distribution genPos{0,49};
-  return genPos(mt);
-}
-
+#include"function.hpp"
 
 int main(){
 
