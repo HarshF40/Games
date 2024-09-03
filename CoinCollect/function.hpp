@@ -1,17 +1,24 @@
 #ifndef FUNC_HPP
 #define FUNC_HPP
 
-#define R if(ch == 'r' || ch == 'R') //Up
-#define N if(ch == 'n' || ch == 'N') //Down
-#define D if(ch == 'd' || ch == 'D') //Left
-#define J if(ch == 'j' || ch == 'J') //Right
+#define UP if(ch == 'w' || ch == 'W') //Up
+#define DOWN if(ch == 's' || ch == 'S') //Down
+#define LEFT if(ch == 'a' || ch == 'A') //Left
+#define RIGHT if(ch == 'd' || ch == 'D') //Right
 
 struct spritePos{
   int y;
   int x;
 };
 
+  extern spritePos pos;
+  extern char arr[20][50];
+  extern char ch;
+  extern int score;
+
 unsigned int genCoinRow();
 unsigned int genCoinCol();
+void GenBase();
+void MainGame();
 
 #endif
