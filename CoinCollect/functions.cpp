@@ -1,12 +1,18 @@
 #include<chrono>
 #include<random>
 #include<ncurses.h>
+#include<chrono>
+#include<thread>
+#include<mutex>
 #include"function.hpp"
 
   spritePos pos{0,0};
+  chaserPos cPos{18,45}; //19,49
   char arr[20][50];
   char ch;
   int score=0;
+  bool gameRunning = true;
+  std::mutex g_lock;
 
 
 unsigned int genCoinRow(){
@@ -33,26 +39,30 @@ void MainGame(){
   init_pair(2,33,COLOR_BLACK);
   init_pair(3,226,COLOR_BLACK);
   init_pair(4,14,COLOR_BLACK);
+  init_pair(5,82,COLOR_BLACK);
 
-
+  std::thread chaser(update);
 
   do{
 
-////Generate Blank////////////////////////////////////////////
-  int row,column,Bcount=0;                                  //
-  while(Bcount<60){                                         //
-    row = genCoinRow(); //used Random Coin generator        //
-    column = genCoinCol();    // "                          //
-    if((arr[row][column]!='@') && (arr[row][column]!='$')){ //
-      arr[row][column] = '#';                               //
-      Bcount++;                                             //
-    } else {                                                //
-      continue;                                             //
-    }                                                       //
-  }                                                         //
-//////////////////////////////////////////////////////////////
+//Generate Blank
+ g_lock.lock();
+  int row,column,Bcount=0;                                  
+  while(Bcount<60){                                         
+    row = genCoinRow(); 
+    column = genCoinCol();       
+    if((arr[row][column]!='@') && (arr[row][column]!='$') && (arr[row][column]!='%')){ 
+      arr[row][column] = '#';                               
+      Bcount++;                                             
+    } else {                                               
+      continue;                                             
+    }                                                       
+  }
+  g_lock.unlock();
 
 ifBlank:
+
+  /*
 
     move(0,0);
     refresh();
@@ -61,9 +71,9 @@ ifBlank:
       printw("\n");
       for(int j=0;j<50;j++){
         if(arr[i][j]=='@'){
-          attron(COLOR_PAIR(1));
+          attron(COLOR_PAIR(5));
           printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(1));
+          attroff(COLOR_PAIR(5));
         } else if(arr[i][j] == '$'){
           attron(COLOR_PAIR(3));
           printw("%2c",arr[i][j]);
@@ -72,16 +82,21 @@ ifBlank:
           attron(COLOR_PAIR(4));
           printw("%2c",arr[i][j]);
           attroff(COLOR_PAIR(4));
-        } else {
+        } else if(arr[i][j] == '%') {
+          attron(COLOR_PAIR(1));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(1));
+          } else {
           attron(COLOR_PAIR(2));
           printw("%2c",arr[i][j]);
           attroff(COLOR_PAIR(2));
         }
       }
-    }
+    } */
 
-    printw("\n\nEnter: ");
-    printw("\nScore: %d/30\n",score);
+    //printw("\n\nEnter: ");
+    //printw("\nScore: %d/30\n",score);
+    printw("\n\rY: %d  X: %d",cPos.y,cPos.x);
 
   ch = getch();
   
@@ -135,6 +150,7 @@ ifBlank:
     goto ifBlank;
 
   }
+  g_lock.lock();
 /////Reset Blank///////////////
   for(int i=0;i<20;i++){     //
     for(int j=0;j<50;j++){   //
@@ -145,9 +161,17 @@ ifBlank:
     }                        //
   }                          //
 ///////////////////////////////
-
+g_lock.unlock();
+////
+if(pos.x == cPos.x && pos.y == cPos.y){
+  printw("\nYoubLoose");
+  break;
+}
+///
 }while(score<30);
 
+  gameRunning = false;
+  chaser.join();
 
   clear();
   move(0,0);
@@ -181,27 +205,147 @@ ifBlank:
 
 void GenBase(){
 
-///Generate Base and add sprite///
-  for(int i=0;i<20;i++){        //
-    for(int j=0;j<50;j++){      //
-      arr[i][j] = '^';          //
-    }                           //
-  }                             //
-  arr[pos.y][pos.x] = '@';      //
-//////////////////////////////////
+//Generate Base and add sprite
+  for(int i=0;i<20;i++){        
+    for(int j=0;j<50;j++){      
+      arr[i][j] = '^';          
+    }                           
+  }                             
+  arr[pos.y][pos.x] = '@';      
+  arr[cPos.y][cPos.x] = '%';    
 
-////Generate Coins////////////////////////////////////////////
-  int row,column,Ccount=0;                                  //
-  while(Ccount<30){                                         //
-    row = genCoinRow();                                     //
-    column = genCoinCol();                                  //
-    if((arr[row][column]!='@') && (arr[row][column]!='$')){ //
-      arr[row][column] = '$';                               //
-      Ccount++;                                             //
-    } else {                                                //
-      continue;                                             //
-    }                                                       //
-  }                                                         //
-//////////////////////////////////////////////////////////////
+//Generate Coins
+  int row,column,Ccount=0;                                  
+  while(Ccount<30){                                         
+    row = genCoinRow();                                     
+    column = genCoinCol();                                  
+    if((arr[row][column]!='@') && (arr[row][column]!='$') && (arr[row][column]!='%')){
+      arr[row][column] = '$';                               
+      Ccount++;                                             
+    } else {                                                
+      continue;                                             
+    }                                                       
+  }                                                         
 
+}
+
+void moveChaser(){
+  //might need to display grid
+//thisbworks
+ /* if(cPos.x > 0 && cPos.y > 0 && cPos.y<=18 && cPos.x<=45){
+  arr[--cPos.y][--cPos.x] = '%';
+  arr[cPos.y+1][cPos.x+1] = '^';
+  }
+  //printw("Hi");*/
+
+  
+  //princple diagonal 
+  if(cPos.x > 0 && cPos.y > 0 && cPos.y<=18 && cPos.x<=45){
+  if((pos.y - pos.x == cPos.y - cPos.x)){
+    if(pos.y>cPos.y){
+      //cPos.y++;
+      //cPos.x++;
+      arr[++cPos.y][++cPos.x] = '%';
+    } else {
+      //cPos.y--;
+      //cPos.x--;
+      arr[--cPos.y][--cPos.x] = '%';
+    }//other diagonal
+  } else if(pos.y + pos.x == cPos.y + cPos.x){
+    if(pos.y>cPos.y){
+      //cPos.y++;
+      //cPos.x--;
+      arr[++cPos.y][--cPos.x] = '%';
+    } else {
+      //cPos.y--;
+      //cPos.x++;
+      arr[--cPos.y][++cPos.x] = '%';
+    }//up(--) & down(++)
+  } else if(pos.x==cPos.x){
+    if(pos.x>cPos.x){
+      //cPos.x++;
+      arr[cPos.y][++cPos.x] = '%';
+    } else {
+      //cPos.x--;
+      arr[cPos.y][--cPos.x] = '%';
+    }//right(++) & left(--)
+  } else if(pos.y == cPos.y) {
+    if(pos.y > cPos.y){
+      //cPos.y++;
+      arr[++cPos.y][cPos.x] = '%';
+    } else {
+      //cPos.y--;
+      arr[--cPos.y][cPos.x] = '%';
+    }
+  } else if(pos.y<cPos.y) {
+    if(pos.x < cPos.x) {
+      while(pos.y - pos.x != cPos.y - cPos.x) {
+        //cPos.y--;
+        arr[--cPos.y][cPos.x] = '%';
+      }
+    } else {
+      while(pos.y + pos.x != cPos.y + cPos.x) {
+        //cPos.y--;
+        arr[--cPos.y][cPos.x] = '%';
+      }
+    }
+  } else if(pos.y > cPos.y) {
+    if(pos.x < cPos.x) {
+      while(pos.y + pos.x != cPos.y + cPos.x) {
+        //cPos.y++;
+        arr[++cPos.y][cPos.x] = '%';
+      }
+    } else {
+      while(pos.y - pos.x != cPos.y - cPos.x){
+        //cPos.y++;
+        arr[++cPos.y][cPos.x] = '%';
+      }
+    }
+  }
+  printw("\n\nY: %d  X: %d",cPos.y,cPos.x);
+  }
+}
+
+void update(){
+  //changes the position of chaser
+  //updates the grid
+  while(gameRunning){
+    //add a pause of 16.67
+    //printw("\nHi");
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    printw("\nHi");
+    moveChaser();
+
+    move(0,0);
+    refresh();
+
+    for(int i=0;i<20;i++){
+      printw("\n");
+      for(int j=0;j<50;j++){
+        if(arr[i][j]=='@'){
+          attron(COLOR_PAIR(5));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(5));
+        } else if(arr[i][j] == '$'){
+          attron(COLOR_PAIR(3));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(3));
+        } else if(arr[i][j] == '#'){
+          attron(COLOR_PAIR(4));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(4));
+        } else if(arr[i][j] == '%') {
+          attron(COLOR_PAIR(1));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(1));
+          } else {
+          attron(COLOR_PAIR(2));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(2));
+        }
+      }
+    }
+
+
+  }
 }
