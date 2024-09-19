@@ -7,7 +7,7 @@
 #include"function.hpp"
 
   spritePos pos{0,0}; //0,0
-  chaserPos cPos{19,19}; //19,49
+  chaserPos cPos{19,49}; //19,49
   char arr[20][50];
   char ch;
   int score=0;
@@ -267,51 +267,33 @@ void moveChaser(){
     }//right(++) & left(--)
   } else if(pos.y == cPos.y) {
     if(pos.x > cPos.x){
-      //cPos.y++;
       arr[cPos.y][++cPos.x] = '%';
       arr[cPos.y][cPos.x-1] = '^';
     } else {
-      //cPos.y--;
       arr[cPos.y][--cPos.x] = '%';
       arr[cPos.y][cPos.x+1] = '^';
     } //working till here
+      //
+      //
+      //
   } else if(pos.y<cPos.y) {
-    if(pos.x < cPos.x) {
-      while(pos.y - pos.x != cPos.y - cPos.x) {
-        //cPos.y--;
-        arr[--cPos.y][cPos.x] = '%';
-      }
-    } else {
-      while(pos.y + pos.x != cPos.y + cPos.x) {
-        //cPos.y--;
-        arr[--cPos.y][cPos.x] = '%';
-      }
-    }
+    arr[--cPos.y][cPos.x] = '%';
+    arr[cPos.y+1][cPos.x] = '^';
   } else if(pos.y > cPos.y) {
-    if(pos.x < cPos.x) {
-      while(pos.y + pos.x != cPos.y + cPos.x) {
-        //cPos.y++;
         arr[++cPos.y][cPos.x] = '%';
-      }
-    } else {
-      while(pos.y - pos.x != cPos.y - cPos.x){
-        //cPos.y++;
-        arr[++cPos.y][cPos.x] = '%';
-      }
+        arr[cPos.y-1][cPos.x] = '^';
     }
   }
   printw("\n\nY: %d  X: %d",cPos.y,cPos.x);
   } 
-}
+
 
 void update(){
   //changes the position of chaser
   //updates the grid
   while(gameRunning){
-    //add a pause of 16.67
-    //printw("\nHi");
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    printw("\nHi");
+    
+    std::this_thread::sleep_for(std::chrono::milliseconds(350));
     moveChaser();
 
     move(0,0);
