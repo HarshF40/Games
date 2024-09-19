@@ -6,8 +6,8 @@
 #include<mutex>
 #include"function.hpp"
 
-  spritePos pos{0,0};
-  chaserPos cPos{18,45}; //19,49
+  spritePos pos{0,0}; //0,0
+  chaserPos cPos{19,19}; //19,49
   char arr[20][50];
   char ch;
   int score=0;
@@ -62,7 +62,7 @@ void MainGame(){
 
 ifBlank:
 
-  /*
+  
 
     move(0,0);
     refresh();
@@ -92,7 +92,7 @@ ifBlank:
           attroff(COLOR_PAIR(2));
         }
       }
-    } */
+    } 
 
     //printw("\n\nEnter: ");
     //printw("\nScore: %d/30\n",score);
@@ -232,51 +232,49 @@ void GenBase(){
 void moveChaser(){
   //might need to display grid
 //thisbworks
- /* if(cPos.x > 0 && cPos.y > 0 && cPos.y<=18 && cPos.x<=45){
+/*
+ if(cPos.x > 0 && cPos.y > 0 && cPos.y<=19 && cPos.x<=49){
   arr[--cPos.y][--cPos.x] = '%';
   arr[cPos.y+1][cPos.x+1] = '^';
   }
   //printw("Hi");*/
-
-  
+ 
   //princple diagonal 
-  if(cPos.x > 0 && cPos.y > 0 && cPos.y<=18 && cPos.x<=45){
+  if(cPos.x >= 0 && cPos.y >= 0 && cPos.y<=19 && cPos.x<=49){
   if((pos.y - pos.x == cPos.y - cPos.x)){
     if(pos.y>cPos.y){
-      //cPos.y++;
-      //cPos.x++;
       arr[++cPos.y][++cPos.x] = '%';
+      arr[cPos.y-1][cPos.x-1] = '^';
     } else {
-      //cPos.y--;
-      //cPos.x--;
       arr[--cPos.y][--cPos.x] = '%';
+      arr[cPos.y+1][cPos.x+1] = '^';
     }//other diagonal
   } else if(pos.y + pos.x == cPos.y + cPos.x){
     if(pos.y>cPos.y){
-      //cPos.y++;
-      //cPos.x--;
       arr[++cPos.y][--cPos.x] = '%';
+      arr[cPos.y-1][cPos.x+1] = '^';
     } else {
-      //cPos.y--;
-      //cPos.x++;
       arr[--cPos.y][++cPos.x] = '%';
+      arr[cPos.y+1][cPos.x-1] = '^';
     }//up(--) & down(++)
   } else if(pos.x==cPos.x){
-    if(pos.x>cPos.x){
-      //cPos.x++;
-      arr[cPos.y][++cPos.x] = '%';
+    if(pos.y<cPos.y){
+      arr[--cPos.y][cPos.x] = '%';
+      arr[cPos.y+1][cPos.x] = '^';
     } else {
-      //cPos.x--;
-      arr[cPos.y][--cPos.x] = '%';
+      arr[++cPos.y][cPos.x] = '%';
+      arr[cPos.y-1][cPos.x] = '^';
     }//right(++) & left(--)
   } else if(pos.y == cPos.y) {
-    if(pos.y > cPos.y){
+    if(pos.x > cPos.x){
       //cPos.y++;
-      arr[++cPos.y][cPos.x] = '%';
+      arr[cPos.y][++cPos.x] = '%';
+      arr[cPos.y][cPos.x-1] = '^';
     } else {
       //cPos.y--;
-      arr[--cPos.y][cPos.x] = '%';
-    }
+      arr[cPos.y][--cPos.x] = '%';
+      arr[cPos.y][cPos.x+1] = '^';
+    } //working till here
   } else if(pos.y<cPos.y) {
     if(pos.x < cPos.x) {
       while(pos.y - pos.x != cPos.y - cPos.x) {
@@ -303,7 +301,7 @@ void moveChaser(){
     }
   }
   printw("\n\nY: %d  X: %d",cPos.y,cPos.x);
-  }
+  } 
 }
 
 void update(){
@@ -312,7 +310,7 @@ void update(){
   while(gameRunning){
     //add a pause of 16.67
     //printw("\nHi");
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
     printw("\nHi");
     moveChaser();
 
