@@ -33,6 +33,35 @@ unsigned int genCoinCol(){
   return genPos(mt);
 }
 
+void displayGrid(){
+ for(int i=0;i<20;i++){
+  printw("\n");
+    for(int j=0;j<50;j++){
+      if(arr[i][j]=='@'){
+          attron(COLOR_PAIR(5));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(5));
+        } else if(arr[i][j] == '$'){
+          attron(COLOR_PAIR(3));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(3));
+        } else if(arr[i][j] == '#'){
+          attron(COLOR_PAIR(4));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(4));
+        } else if(arr[i][j] == '%') {
+          attron(COLOR_PAIR(1));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(1));
+        } else {
+          attron(COLOR_PAIR(2));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(2));
+      }
+    }
+  } 
+}
+
 void MainGame(){ 
 
   start_color();
@@ -46,7 +75,7 @@ void MainGame(){
 
   do{
 
-//Generate Blank
+//Generate Barriers
  g_lock.lock();
   int row,column,Bcount=0;                                  
     while(Bcount<60){                                         
@@ -66,32 +95,7 @@ ifBlank:
     move(0,0);
     refresh();
 
-    for(int i=0;i<20;i++){
-      printw("\n");
-      for(int j=0;j<50;j++){
-        if(arr[i][j]=='@'){
-          attron(COLOR_PAIR(5));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(5));
-        } else if(arr[i][j] == '$'){
-          attron(COLOR_PAIR(3));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(3));
-        } else if(arr[i][j] == '#'){
-          attron(COLOR_PAIR(4));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(4));
-        } else if(arr[i][j] == '%') {
-          attron(COLOR_PAIR(1));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(1));
-          } else {
-          attron(COLOR_PAIR(2));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(2));
-        }
-      }
-    } 
+    displayGrid(); 
 
     printw("\n\nEnter: ");
     printw("\nScore: %d/30\n",score);
@@ -164,29 +168,10 @@ ifBlank:
   gameRunning = false;
   chaser.join();
 
-  //clear();
   move(0,0);
   refresh();
 
-
-    for(int i=0;i<20;i++){
-      printw("\n");
-      for(int j=0;j<50;j++){
-        if(arr[i][j]=='@'){
-          attron(COLOR_PAIR(1));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(1));
-        } else if(arr[i][j] == '$'){
-          attron(COLOR_PAIR(3));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(3));
-        } else {
-          attron(COLOR_PAIR(2));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(2));
-        }
-      }
-    } 
+  displayGrid();
 
   if(lostByChaser){
     move(9,24);
@@ -280,15 +265,13 @@ void moveChaser(){
      } else {
        arr[++cPos.y][++cPos.x] = '%';
        arr[cPos.y-1][cPos.x-1] = '^';
-     }
+      }
     }
   }
 } 
 
 
 void update(){
-  //changes the position of chaser
-  //updates the grid
   while(gameRunning){
     
     std::this_thread::sleep_for(std::chrono::milliseconds(350));
@@ -297,64 +280,14 @@ void update(){
     move(0,0);
     refresh();
 
-    for(int i=0;i<20;i++){
-      printw("\n");
-      for(int j=0;j<50;j++){
-        if(arr[i][j]=='@'){
-          attron(COLOR_PAIR(5));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(5));
-        } else if(arr[i][j] == '$'){
-          attron(COLOR_PAIR(3));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(3));
-        } else if(arr[i][j] == '#'){
-          attron(COLOR_PAIR(4));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(4));
-        } else if(arr[i][j] == '%') {
-          attron(COLOR_PAIR(1));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(1));
-          } else {
-          attron(COLOR_PAIR(2));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(2));
-        }
-      }
-    }
+    displayGrid();
+
       if(pos.x == cPos.x && pos.y == cPos.y){
         lostByChaser = true;
-     for(int i=0;i<20;i++){
-      printw("\n");
-      for(int j=0;j<50;j++){
-        if(arr[i][j]=='@'){
-          attron(COLOR_PAIR(5));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(5));
-        } else if(arr[i][j] == '$'){
-          attron(COLOR_PAIR(3));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(3));
-        } else if(arr[i][j] == '#'){
-          attron(COLOR_PAIR(4));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(4));
-        } else if(arr[i][j] == '%') {
-          attron(COLOR_PAIR(1));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(1));
-          } else {
-          attron(COLOR_PAIR(2));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(2));
-        }
-      }
-    }
+        displayGrid();
         clear();
         refresh();
         break;
     }
-
   }
 }

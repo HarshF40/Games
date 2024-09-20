@@ -29,5 +29,6 @@ void GenBase();
 void MainGame();
 void update();
 void moveChaser();
+void displayGrid();
 
 #endif
