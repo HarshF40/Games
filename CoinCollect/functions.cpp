@@ -1,12 +1,19 @@
 #include<chrono>
 #include<random>
 #include<ncurses.h>
+#include<chrono>
+#include<thread>
+#include<mutex>
 #include"function.hpp"
 
-  spritePos pos{0,0};
+  spritePos pos{0,0}; //0,0
+  chaserPos cPos{19,49}; //19,49
   char arr[20][50];
   char ch;
   int score=0;
+  bool gameRunning = true;
+  bool lostByChaser = false;
+  std::mutex g_lock;
 
 
 unsigned int genCoinRow(){
@@ -33,26 +40,28 @@ void MainGame(){
   init_pair(2,33,COLOR_BLACK);
   init_pair(3,226,COLOR_BLACK);
   init_pair(4,14,COLOR_BLACK);
+  init_pair(5,82,COLOR_BLACK);
 
-
+  std::thread chaser(update);
 
   do{
 
-////Generate Blank////////////////////////////////////////////
-  int row,column,Bcount=0;                                  //
-  while(Bcount<60){                                         //
-    row = genCoinRow(); //used Random Coin generator        //
-    column = genCoinCol();    // "                          //
-    if((arr[row][column]!='@') && (arr[row][column]!='$')){ //
-      arr[row][column] = '#';                               //
-      Bcount++;                                             //
-    } else {                                                //
-      continue;                                             //
-    }                                                       //
-  }                                                         //
-//////////////////////////////////////////////////////////////
+//Generate Blank
+ g_lock.lock();
+  int row,column,Bcount=0;                                  
+    while(Bcount<60){                                         
+      row = genCoinRow(); 
+      column = genCoinCol();       
+      if((arr[row][column]!='@') && (arr[row][column]!='$') && (arr[row][column]!='%')){ 
+        arr[row][column] = '#';                               
+        Bcount++;                                             
+      } else {                                               
+        continue;                                             
+      }                                                       
+  }
+  g_lock.unlock();
 
-ifBlank:
+ifBlank: 
 
     move(0,0);
     refresh();
@@ -61,9 +70,9 @@ ifBlank:
       printw("\n");
       for(int j=0;j<50;j++){
         if(arr[i][j]=='@'){
-          attron(COLOR_PAIR(1));
+          attron(COLOR_PAIR(5));
           printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(1));
+          attroff(COLOR_PAIR(5));
         } else if(arr[i][j] == '$'){
           attron(COLOR_PAIR(3));
           printw("%2c",arr[i][j]);
@@ -72,13 +81,17 @@ ifBlank:
           attron(COLOR_PAIR(4));
           printw("%2c",arr[i][j]);
           attroff(COLOR_PAIR(4));
-        } else {
+        } else if(arr[i][j] == '%') {
+          attron(COLOR_PAIR(1));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(1));
+          } else {
           attron(COLOR_PAIR(2));
           printw("%2c",arr[i][j]);
           attroff(COLOR_PAIR(2));
         }
       }
-    }
+    } 
 
     printw("\n\nEnter: ");
     printw("\nScore: %d/30\n",score);
@@ -131,27 +144,29 @@ ifBlank:
       goto ifBlank;
     }
   } else {
-
     goto ifBlank;
-
   }
-/////Reset Blank///////////////
-  for(int i=0;i<20;i++){     //
-    for(int j=0;j<50;j++){   //
-      if(arr[i][j] == '#')   //
-        arr[i][j] = '^';     //
-      else                   //
-        continue;            //
-    }                        //
-  }                          //
-///////////////////////////////
 
-}while(score<30);
+  g_lock.lock();
+       //Reset Blank
+      for(int i=0;i<20;i++){     
+        for(int j=0;j<50;j++){   
+          if(arr[i][j] == '#')   
+            arr[i][j] = '^';     
+          else                   
+            continue;            
+          }                        
+        }                          
+  g_lock.unlock();
 
+}while(score<30 && !lostByChaser);
 
-  clear();
+  gameRunning = false;
+  chaser.join();
+
+  //clear();
   move(0,0);
-    refresh();
+  refresh();
 
 
     for(int i=0;i<20;i++){
@@ -171,37 +186,175 @@ ifBlank:
           attroff(COLOR_PAIR(2));
         }
       }
-    }
+    } 
 
-
-  printw("\nYou Won!");
+  if(lostByChaser){
+    move(9,24);
+    refresh();
+    printw("\nYou Lost");
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+  } else {
+    move(9,24);
+    refresh();
+    printw("\nYou Won!");
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+  }
+  printw("\nPress Any Key To Continue");
   getch();
 
 }
 
 void GenBase(){
 
-///Generate Base and add sprite///
-  for(int i=0;i<20;i++){        //
-    for(int j=0;j<50;j++){      //
-      arr[i][j] = '^';          //
-    }                           //
-  }                             //
-  arr[pos.y][pos.x] = '@';      //
-//////////////////////////////////
+//Generate Base and add sprite
+  for(int i=0;i<20;i++){        
+    for(int j=0;j<50;j++){      
+      arr[i][j] = '^';          
+    }                           
+  }                             
+  arr[pos.y][pos.x] = '@';      
+  arr[cPos.y][cPos.x] = '%';    
 
-////Generate Coins////////////////////////////////////////////
-  int row,column,Ccount=0;                                  //
-  while(Ccount<30){                                         //
-    row = genCoinRow();                                     //
-    column = genCoinCol();                                  //
-    if((arr[row][column]!='@') && (arr[row][column]!='$')){ //
-      arr[row][column] = '$';                               //
-      Ccount++;                                             //
-    } else {                                                //
-      continue;                                             //
-    }                                                       //
-  }                                                         //
-//////////////////////////////////////////////////////////////
+//Generate Coins
+  int row,column,Ccount=0;                                  
+  while(Ccount<30){                                         
+    row = genCoinRow();                                     
+    column = genCoinCol();                                  
+    if((arr[row][column]!='@') && (arr[row][column]!='$') && (arr[row][column]!='%')){
+      arr[row][column] = '$';                               
+      Ccount++;                                             
+    } else {                                                
+      continue;                                             
+    }                                                       
+  }                                                         
 
+}
+
+void moveChaser(){ 
+  //princple diagonal 
+  if(cPos.x >= 0 && cPos.y >= 0 && cPos.y<=19 && cPos.x<=49){
+  if((pos.y - pos.x == cPos.y - cPos.x)){
+    if(pos.y>cPos.y){
+      arr[++cPos.y][++cPos.x] = '%';
+      arr[cPos.y-1][cPos.x-1] = '^';
+    } else {
+      arr[--cPos.y][--cPos.x] = '%';
+      arr[cPos.y+1][cPos.x+1] = '^';
+    }//other diagonal
+  } else if(pos.y + pos.x == cPos.y + cPos.x){
+    if(pos.y>cPos.y){
+      arr[++cPos.y][--cPos.x] = '%';
+      arr[cPos.y-1][cPos.x+1] = '^';
+    } else {
+      arr[--cPos.y][++cPos.x] = '%';
+      arr[cPos.y+1][cPos.x-1] = '^';
+    }//up(--) & down(++)
+  } else if(pos.x==cPos.x){
+    if(pos.y<cPos.y){
+      arr[--cPos.y][cPos.x] = '%';
+      arr[cPos.y+1][cPos.x] = '^';
+    } else {
+      arr[++cPos.y][cPos.x] = '%';
+      arr[cPos.y-1][cPos.x] = '^';
+    }//right(++) & left(--)
+  } else if(pos.y == cPos.y) {
+    if(pos.x > cPos.x){
+      arr[cPos.y][++cPos.x] = '%';
+      arr[cPos.y][cPos.x-1] = '^';
+    } else {
+      arr[cPos.y][--cPos.x] = '%';
+      arr[cPos.y][cPos.x+1] = '^';
+    } 
+  } else if(pos.y<cPos.y) {
+    if(pos.x<cPos.x){
+      arr[--cPos.y][--cPos.x] = '%';
+      arr[cPos.y+1][cPos.x+1] = '^';
+    } else {
+      arr[--cPos.y][++cPos.x] = '%';
+      arr[cPos.y+1][cPos.x-1] = '^';
+    }
+  } else if(pos.y > cPos.y) {
+    if(pos.x<cPos.x){
+        arr[++cPos.y][--cPos.x] = '%';
+        arr[cPos.y-1][cPos.x+1] = '^';
+     } else {
+       arr[++cPos.y][++cPos.x] = '%';
+       arr[cPos.y-1][cPos.x-1] = '^';
+     }
+    }
+  }
+} 
+
+
+void update(){
+  //changes the position of chaser
+  //updates the grid
+  while(gameRunning){
+    
+    std::this_thread::sleep_for(std::chrono::milliseconds(350));
+    moveChaser();
+
+    move(0,0);
+    refresh();
+
+    for(int i=0;i<20;i++){
+      printw("\n");
+      for(int j=0;j<50;j++){
+        if(arr[i][j]=='@'){
+          attron(COLOR_PAIR(5));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(5));
+        } else if(arr[i][j] == '$'){
+          attron(COLOR_PAIR(3));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(3));
+        } else if(arr[i][j] == '#'){
+          attron(COLOR_PAIR(4));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(4));
+        } else if(arr[i][j] == '%') {
+          attron(COLOR_PAIR(1));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(1));
+          } else {
+          attron(COLOR_PAIR(2));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(2));
+        }
+      }
+    }
+      if(pos.x == cPos.x && pos.y == cPos.y){
+        lostByChaser = true;
+     for(int i=0;i<20;i++){
+      printw("\n");
+      for(int j=0;j<50;j++){
+        if(arr[i][j]=='@'){
+          attron(COLOR_PAIR(5));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(5));
+        } else if(arr[i][j] == '$'){
+          attron(COLOR_PAIR(3));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(3));
+        } else if(arr[i][j] == '#'){
+          attron(COLOR_PAIR(4));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(4));
+        } else if(arr[i][j] == '%') {
+          attron(COLOR_PAIR(1));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(1));
+          } else {
+          attron(COLOR_PAIR(2));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(2));
+        }
+      }
+    }
+        clear();
+        refresh();
+        break;
+    }
+
+  }
 }

@@ -11,14 +11,23 @@ struct spritePos{
   int x;
 };
 
+struct chaserPos{
+  int y;
+  int x;
+};
+
   extern spritePos pos;
+  extern chaserPos cPos;
   extern char arr[20][50];
   extern char ch;
   extern int score;
+  extern bool gameRunning;
 
 unsigned int genCoinRow();
 unsigned int genCoinCol();
 void GenBase();
 void MainGame();
+void update();
+void moveChaser();
 
 #endif
