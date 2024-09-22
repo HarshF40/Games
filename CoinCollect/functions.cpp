@@ -34,6 +34,7 @@ unsigned int genCoinCol(){
 }
 
 void displayGrid(){
+  refresh();
  for(int i=0;i<20;i++){
   printw("\n");
     for(int j=0;j<50;j++){
@@ -92,7 +93,7 @@ void MainGame(){
 
 ifBlank: 
 
-    move(0,0);
+    clear();
     refresh();
 
     displayGrid(); 
@@ -109,7 +110,7 @@ ifBlank:
         score++;
       }
     arr[(pos.y)-1][pos.x] = '@';
-    arr[pos.y][pos.x] = '^';
+    arr[pos.y][pos.x] = ' ';
     (pos.y)--;
     } else {
       goto ifBlank;
@@ -120,7 +121,7 @@ ifBlank:
         score++;
       }
     arr[(pos.y)+1][pos.x] = '@';
-    arr[pos.y][pos.x] = '^';
+    arr[pos.y][pos.x] = ' ';
     (pos.y)++;
     } else {
       goto ifBlank;
@@ -131,7 +132,7 @@ ifBlank:
         score++;
       }
     arr[pos.y][(pos.x)-1] = '@';
-    arr[pos.y][pos.x] = '^';
+    arr[pos.y][pos.x] = ' ';
     (pos.x)--;
     } else {
       goto ifBlank;
@@ -142,7 +143,7 @@ ifBlank:
         score++;
       }
     arr[pos.y][(pos.x)+1] = '@';
-    arr[pos.y][pos.x] = '^';
+    arr[pos.y][pos.x] = ' ';
     (pos.x)++;
     } else {
       goto ifBlank;
@@ -156,7 +157,7 @@ ifBlank:
       for(int i=0;i<20;i++){     
         for(int j=0;j<50;j++){   
           if(arr[i][j] == '#')   
-            arr[i][j] = '^';     
+            arr[i][j] = ' ';     
           else                   
             continue;            
           }                        
@@ -168,18 +169,16 @@ ifBlank:
   gameRunning = false;
   chaser.join();
 
-  move(0,0);
+  clear();
   refresh();
 
   displayGrid();
 
   if(lostByChaser){
-    move(9,24);
     refresh();
     printw("\nYou Lost");
     std::this_thread::sleep_for(std::chrono::seconds(5));
   } else {
-    move(9,24);
     refresh();
     printw("\nYou Won!");
     std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -194,7 +193,7 @@ void GenBase(){
 //Generate Base and add sprite
   for(int i=0;i<20;i++){        
     for(int j=0;j<50;j++){      
-      arr[i][j] = '^';          
+      arr[i][j] = ' ';          
     }                           
   }                             
   arr[pos.y][pos.x] = '@';      
@@ -221,50 +220,50 @@ void moveChaser(){
   if((pos.y - pos.x == cPos.y - cPos.x)){
     if(pos.y>cPos.y){
       arr[++cPos.y][++cPos.x] = '%';
-      arr[cPos.y-1][cPos.x-1] = '^';
+      arr[cPos.y-1][cPos.x-1] = ' ';
     } else {
       arr[--cPos.y][--cPos.x] = '%';
-      arr[cPos.y+1][cPos.x+1] = '^';
+      arr[cPos.y+1][cPos.x+1] = ' ';
     }//other diagonal
   } else if(pos.y + pos.x == cPos.y + cPos.x){
     if(pos.y>cPos.y){
       arr[++cPos.y][--cPos.x] = '%';
-      arr[cPos.y-1][cPos.x+1] = '^';
+      arr[cPos.y-1][cPos.x+1] = ' ';
     } else {
       arr[--cPos.y][++cPos.x] = '%';
-      arr[cPos.y+1][cPos.x-1] = '^';
+      arr[cPos.y+1][cPos.x-1] = ' ';
     }//up(--) & down(++)
   } else if(pos.x==cPos.x){
     if(pos.y<cPos.y){
       arr[--cPos.y][cPos.x] = '%';
-      arr[cPos.y+1][cPos.x] = '^';
+      arr[cPos.y+1][cPos.x] = ' ';
     } else {
       arr[++cPos.y][cPos.x] = '%';
-      arr[cPos.y-1][cPos.x] = '^';
+      arr[cPos.y-1][cPos.x] = ' ';
     }//right(++) & left(--)
   } else if(pos.y == cPos.y) {
     if(pos.x > cPos.x){
       arr[cPos.y][++cPos.x] = '%';
-      arr[cPos.y][cPos.x-1] = '^';
+      arr[cPos.y][cPos.x-1] = ' ';
     } else {
       arr[cPos.y][--cPos.x] = '%';
-      arr[cPos.y][cPos.x+1] = '^';
+      arr[cPos.y][cPos.x+1] = ' ';
     } 
   } else if(pos.y<cPos.y) {
     if(pos.x<cPos.x){
       arr[--cPos.y][--cPos.x] = '%';
-      arr[cPos.y+1][cPos.x+1] = '^';
+      arr[cPos.y+1][cPos.x+1] = ' ';
     } else {
       arr[--cPos.y][++cPos.x] = '%';
-      arr[cPos.y+1][cPos.x-1] = '^';
+      arr[cPos.y+1][cPos.x-1] = ' ';
     }
   } else if(pos.y > cPos.y) {
     if(pos.x<cPos.x){
         arr[++cPos.y][--cPos.x] = '%';
-        arr[cPos.y-1][cPos.x+1] = '^';
+        arr[cPos.y-1][cPos.x+1] = ' ';
      } else {
        arr[++cPos.y][++cPos.x] = '%';
-       arr[cPos.y-1][cPos.x-1] = '^';
+       arr[cPos.y-1][cPos.x-1] = ' ';
       }
     }
   }
@@ -284,9 +283,9 @@ void update(){
 
       if(pos.x == cPos.x && pos.y == cPos.y){
         lostByChaser = true;
-        displayGrid();
         clear();
         refresh();
+        displayGrid();
         break;
     }
   }
