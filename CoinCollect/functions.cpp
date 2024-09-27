@@ -6,13 +6,12 @@
 #include<mutex>
 #include"function.hpp"
 
-  spritePos pos{0,0}; //0,0
-  chaserPos cPos{19,49}; //19,49
+
   char arr[20][50];
   char ch;
   int score=0;
-  bool gameRunning = true;
-  bool lostByChaser = false;
+  static bool gameRunning;
+  static bool lostByChaser;
   std::mutex g_lock;
 
 
@@ -63,7 +62,11 @@ void displayGrid(){
   } 
 }
 
-void MainGame(){ 
+void MainGame(){
+
+  gameRunning = true;
+  lostByChaser = false;
+  int score = 0;
 
   start_color();
   init_pair(1,196,COLOR_BLACK);
@@ -98,10 +101,8 @@ ifBlank:
 
     displayGrid(); 
 
-    printw("\n\nEnter: ");
     printw("\nScore: %d/30\n",score);
-
-  ch = getch();
+    ch = getch();
   
   UP{
 
@@ -169,27 +170,10 @@ ifBlank:
   gameRunning = false;
   chaser.join();
 
-  clear();
-  refresh();
-
-  displayGrid();
-
-  if(lostByChaser){
-    refresh();
-    printw("\nYou Lost");
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-  } else {
-    refresh();
-    printw("\nYou Won!");
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-  }
-  printw("\nPress Any Key To Continue");
-  getch();
-
 }
 
-void GenBase(){
 
+void GenBase(){
 //Generate Base and add sprite
   for(int i=0;i<20;i++){        
     for(int j=0;j<50;j++){      
@@ -211,8 +195,8 @@ void GenBase(){
       continue;                                             
     }                                                       
   }                                                         
-
 }
+
 
 void moveChaser(){ 
   //princple diagonal 

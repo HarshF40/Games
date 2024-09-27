@@ -4,28 +4,35 @@
 #include<random>
 #include"function.hpp"
 
+  spritePos pos{0,0};
+  chaserPos cPos{19,49};
+
 int main(){
+
+game:
 
   char choice;
 
-  do{
-
-  spritePos pos{0,0};
-  int score=0;
-
-  GenBase();
+  pos.y=0;
+  pos.x=0;
+  cPos.y=19;
+  cPos.x=49;
 
   initscr();
 
-  MainGame();
+  GenBase();
+  MainGame(); 
 
-  endwin(); 
+  endwin();
 
-  system("clear");
-  std::cout<<"\nQuit(q)/Play Again(p): ";
+  std::cout<<"\nEnter Choice: ";
   std::cin>>choice;
 
-  }while(choice != 'q');
+  if(choice == 'p')
+    goto game;
+
+
+  std::cout<<std::endl<<"Program Complete!";
 
   return 0;
 }

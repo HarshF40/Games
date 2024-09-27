@@ -21,7 +21,6 @@ struct chaserPos{
   extern char arr[20][50];
   extern char ch;
   extern int score;
-  extern bool gameRunning;
 
 unsigned int genCoinRow();
 unsigned int genCoinCol();
