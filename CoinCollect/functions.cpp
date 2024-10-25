@@ -6,13 +6,12 @@
 #include<mutex>
 #include"function.hpp"
 
-  spritePos pos{0,0}; //0,0
-  chaserPos cPos{19,49}; //19,49
+
   char arr[20][50];
   char ch;
   int score=0;
-  bool gameRunning = true;
-  bool lostByChaser = false;
+  static bool gameRunning;
+  static bool lostByChaser;
   std::mutex g_lock;
 
 
@@ -33,7 +32,41 @@ unsigned int genCoinCol(){
   return genPos(mt);
 }
 
-void MainGame(){ 
+void displayGrid(){
+  refresh();
+ for(int i=0;i<20;i++){
+  printw("\n");
+    for(int j=0;j<50;j++){
+      if(arr[i][j]=='@'){
+          attron(COLOR_PAIR(5));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(5));
+        } else if(arr[i][j] == '$'){
+          attron(COLOR_PAIR(3));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(3));
+        } else if(arr[i][j] == '#'){
+          attron(COLOR_PAIR(4));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(4));
+        } else if(arr[i][j] == '%') {
+          attron(COLOR_PAIR(1));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(1));
+        } else {
+          attron(COLOR_PAIR(2));
+          printw("%2c",arr[i][j]);
+          attroff(COLOR_PAIR(2));
+      }
+    }
+  } 
+}
+
+void MainGame(){
+
+  gameRunning = true;
+  lostByChaser = false;
+  int score = 0;
 
   start_color();
   init_pair(1,196,COLOR_BLACK);
@@ -46,7 +79,7 @@ void MainGame(){
 
   do{
 
-//Generate Blank
+//Generate Barriers
  g_lock.lock();
   int row,column,Bcount=0;                                  
     while(Bcount<60){                                         
@@ -63,40 +96,13 @@ void MainGame(){
 
 ifBlank: 
 
-    move(0,0);
+    clear();
     refresh();
 
-    for(int i=0;i<20;i++){
-      printw("\n");
-      for(int j=0;j<50;j++){
-        if(arr[i][j]=='@'){
-          attron(COLOR_PAIR(5));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(5));
-        } else if(arr[i][j] == '$'){
-          attron(COLOR_PAIR(3));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(3));
-        } else if(arr[i][j] == '#'){
-          attron(COLOR_PAIR(4));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(4));
-        } else if(arr[i][j] == '%') {
-          attron(COLOR_PAIR(1));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(1));
-          } else {
-          attron(COLOR_PAIR(2));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(2));
-        }
-      }
-    } 
+    displayGrid(); 
 
-    printw("\n\nEnter: ");
     printw("\nScore: %d/30\n",score);
-
-  ch = getch();
+    ch = getch();
   
   UP{
 
@@ -105,7 +111,7 @@ ifBlank:
         score++;
       }
     arr[(pos.y)-1][pos.x] = '@';
-    arr[pos.y][pos.x] = '^';
+    arr[pos.y][pos.x] = ' ';
     (pos.y)--;
     } else {
       goto ifBlank;
@@ -116,7 +122,7 @@ ifBlank:
         score++;
       }
     arr[(pos.y)+1][pos.x] = '@';
-    arr[pos.y][pos.x] = '^';
+    arr[pos.y][pos.x] = ' ';
     (pos.y)++;
     } else {
       goto ifBlank;
@@ -127,7 +133,7 @@ ifBlank:
         score++;
       }
     arr[pos.y][(pos.x)-1] = '@';
-    arr[pos.y][pos.x] = '^';
+    arr[pos.y][pos.x] = ' ';
     (pos.x)--;
     } else {
       goto ifBlank;
@@ -138,7 +144,7 @@ ifBlank:
         score++;
       }
     arr[pos.y][(pos.x)+1] = '@';
-    arr[pos.y][pos.x] = '^';
+    arr[pos.y][pos.x] = ' ';
     (pos.x)++;
     } else {
       goto ifBlank;
@@ -152,7 +158,7 @@ ifBlank:
       for(int i=0;i<20;i++){     
         for(int j=0;j<50;j++){   
           if(arr[i][j] == '#')   
-            arr[i][j] = '^';     
+            arr[i][j] = ' ';     
           else                   
             continue;            
           }                        
@@ -164,52 +170,14 @@ ifBlank:
   gameRunning = false;
   chaser.join();
 
-  //clear();
-  move(0,0);
-  refresh();
-
-
-    for(int i=0;i<20;i++){
-      printw("\n");
-      for(int j=0;j<50;j++){
-        if(arr[i][j]=='@'){
-          attron(COLOR_PAIR(1));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(1));
-        } else if(arr[i][j] == '$'){
-          attron(COLOR_PAIR(3));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(3));
-        } else {
-          attron(COLOR_PAIR(2));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(2));
-        }
-      }
-    } 
-
-  if(lostByChaser){
-    move(9,24);
-    refresh();
-    printw("\nYou Lost");
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-  } else {
-    move(9,24);
-    refresh();
-    printw("\nYou Won!");
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-  }
-  printw("\nPress Any Key To Continue");
-  getch();
-
 }
 
-void GenBase(){
 
+void GenBase(){
 //Generate Base and add sprite
   for(int i=0;i<20;i++){        
     for(int j=0;j<50;j++){      
-      arr[i][j] = '^';          
+      arr[i][j] = ' ';          
     }                           
   }                             
   arr[pos.y][pos.x] = '@';      
@@ -227,8 +195,8 @@ void GenBase(){
       continue;                                             
     }                                                       
   }                                                         
-
 }
+
 
 void moveChaser(){ 
   //princple diagonal 
@@ -236,59 +204,57 @@ void moveChaser(){
   if((pos.y - pos.x == cPos.y - cPos.x)){
     if(pos.y>cPos.y){
       arr[++cPos.y][++cPos.x] = '%';
-      arr[cPos.y-1][cPos.x-1] = '^';
+      arr[cPos.y-1][cPos.x-1] = ' ';
     } else {
       arr[--cPos.y][--cPos.x] = '%';
-      arr[cPos.y+1][cPos.x+1] = '^';
+      arr[cPos.y+1][cPos.x+1] = ' ';
     }//other diagonal
   } else if(pos.y + pos.x == cPos.y + cPos.x){
     if(pos.y>cPos.y){
       arr[++cPos.y][--cPos.x] = '%';
-      arr[cPos.y-1][cPos.x+1] = '^';
+      arr[cPos.y-1][cPos.x+1] = ' ';
     } else {
       arr[--cPos.y][++cPos.x] = '%';
-      arr[cPos.y+1][cPos.x-1] = '^';
+      arr[cPos.y+1][cPos.x-1] = ' ';
     }//up(--) & down(++)
   } else if(pos.x==cPos.x){
     if(pos.y<cPos.y){
       arr[--cPos.y][cPos.x] = '%';
-      arr[cPos.y+1][cPos.x] = '^';
+      arr[cPos.y+1][cPos.x] = ' ';
     } else {
       arr[++cPos.y][cPos.x] = '%';
-      arr[cPos.y-1][cPos.x] = '^';
+      arr[cPos.y-1][cPos.x] = ' ';
     }//right(++) & left(--)
   } else if(pos.y == cPos.y) {
     if(pos.x > cPos.x){
       arr[cPos.y][++cPos.x] = '%';
-      arr[cPos.y][cPos.x-1] = '^';
+      arr[cPos.y][cPos.x-1] = ' ';
     } else {
       arr[cPos.y][--cPos.x] = '%';
-      arr[cPos.y][cPos.x+1] = '^';
+      arr[cPos.y][cPos.x+1] = ' ';
     } 
   } else if(pos.y<cPos.y) {
     if(pos.x<cPos.x){
       arr[--cPos.y][--cPos.x] = '%';
-      arr[cPos.y+1][cPos.x+1] = '^';
+      arr[cPos.y+1][cPos.x+1] = ' ';
     } else {
       arr[--cPos.y][++cPos.x] = '%';
-      arr[cPos.y+1][cPos.x-1] = '^';
+      arr[cPos.y+1][cPos.x-1] = ' ';
     }
   } else if(pos.y > cPos.y) {
     if(pos.x<cPos.x){
         arr[++cPos.y][--cPos.x] = '%';
-        arr[cPos.y-1][cPos.x+1] = '^';
+        arr[cPos.y-1][cPos.x+1] = ' ';
      } else {
        arr[++cPos.y][++cPos.x] = '%';
-       arr[cPos.y-1][cPos.x-1] = '^';
-     }
+       arr[cPos.y-1][cPos.x-1] = ' ';
+      }
     }
   }
 } 
 
 
 void update(){
-  //changes the position of chaser
-  //updates the grid
   while(gameRunning){
     
     std::this_thread::sleep_for(std::chrono::milliseconds(350));
@@ -297,64 +263,14 @@ void update(){
     move(0,0);
     refresh();
 
-    for(int i=0;i<20;i++){
-      printw("\n");
-      for(int j=0;j<50;j++){
-        if(arr[i][j]=='@'){
-          attron(COLOR_PAIR(5));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(5));
-        } else if(arr[i][j] == '$'){
-          attron(COLOR_PAIR(3));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(3));
-        } else if(arr[i][j] == '#'){
-          attron(COLOR_PAIR(4));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(4));
-        } else if(arr[i][j] == '%') {
-          attron(COLOR_PAIR(1));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(1));
-          } else {
-          attron(COLOR_PAIR(2));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(2));
-        }
-      }
-    }
+    displayGrid();
+
       if(pos.x == cPos.x && pos.y == cPos.y){
         lostByChaser = true;
-     for(int i=0;i<20;i++){
-      printw("\n");
-      for(int j=0;j<50;j++){
-        if(arr[i][j]=='@'){
-          attron(COLOR_PAIR(5));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(5));
-        } else if(arr[i][j] == '$'){
-          attron(COLOR_PAIR(3));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(3));
-        } else if(arr[i][j] == '#'){
-          attron(COLOR_PAIR(4));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(4));
-        } else if(arr[i][j] == '%') {
-          attron(COLOR_PAIR(1));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(1));
-          } else {
-          attron(COLOR_PAIR(2));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(2));
-        }
-      }
-    }
         clear();
         refresh();
+        displayGrid();
         break;
     }
-
   }
 }
