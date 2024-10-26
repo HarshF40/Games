@@ -21,6 +21,7 @@ struct chaserPos{
   extern char arr[20][50];
   extern char ch;
   extern int score;
+  extern std::vector<std::pair<int,int>> coinsCoord;
 
 unsigned int genCoinRow();
 unsigned int genCoinCol();
@@ -29,5 +30,6 @@ void MainGame();
 void update();
 void moveChaser();
 void displayGrid();
+bool checkCoin(int,int);
 
 #endif
