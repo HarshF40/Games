@@ -4,14 +4,18 @@
 #include<chrono>
 #include<thread>
 #include<mutex>
+#include<vector>
+#include<utility>
 #include"function.hpp"
 
+//vector with std::pair to store the possition of the coins to then compare with the position of the chaser... to block it or not
 
   char arr[20][50];
   char ch;
   int score=0;
   static bool gameRunning;
   static bool lostByChaser;
+  std::vector<std::pair<int,int>> coinsCoord;
   std::mutex g_lock;
 
 
@@ -19,7 +23,7 @@ unsigned int genCoinRow(){
   std::random_device rd{};
   std::seed_seq ss{static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count()),rd(),rd(),rd(),rd(),rd(),rd(),rd()};
   std::mt19937 mt{ss};
-  std::uniform_int_distribution genPos{0,19};
+  std::uniform_int_distribution<int> genPos{0,19};
   return genPos(mt);
 }
 
@@ -28,7 +32,7 @@ unsigned int genCoinCol(){
   std::random_device rd{};
   std::seed_seq ss{static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count()),rd(),rd(),rd(),rd(),rd(),rd(),rd()};
   std::mt19937 mt{ss};
-  std::uniform_int_distribution genPos{0,49};
+  std::uniform_int_distribution<int> genPos{0,49};
   return genPos(mt);
 }
 
@@ -187,7 +191,9 @@ void GenBase(){
   int row,column,Ccount=0;                                  
   while(Ccount<30){                                         
     row = genCoinRow();                                     
-    column = genCoinCol();                                  
+    column = genCoinCol(); 
+    //y,x ==> pair
+    coinsCoord.push_back(std::make_pair(row,column));                                 
     if((arr[row][column]!='@') && (arr[row][column]!='$') && (arr[row][column]!='%')){
       arr[row][column] = '$';                               
       Ccount++;                                             
@@ -202,50 +208,50 @@ void moveChaser(){
   //princple diagonal 
   if(cPos.x >= 0 && cPos.y >= 0 && cPos.y<=19 && cPos.x<=49){
   if((pos.y - pos.x == cPos.y - cPos.x)){
-    if(pos.y>cPos.y){
+    if(pos.y>cPos.y && checkCoin(cPos.y+1,cPos.x+1)){
       arr[++cPos.y][++cPos.x] = '%';
       arr[cPos.y-1][cPos.x-1] = ' ';
-    } else {
+    } else if(checkCoin(cPos.y-1,cPos.x-1)){
       arr[--cPos.y][--cPos.x] = '%';
       arr[cPos.y+1][cPos.x+1] = ' ';
     }//other diagonal
   } else if(pos.y + pos.x == cPos.y + cPos.x){
-    if(pos.y>cPos.y){
+    if(pos.y>cPos.y && checkCoin(cPos.y+1,cPos.x-1)){
       arr[++cPos.y][--cPos.x] = '%';
       arr[cPos.y-1][cPos.x+1] = ' ';
-    } else {
+    } else if(checkCoin(cPos.y-1,cPos.x+1)){
       arr[--cPos.y][++cPos.x] = '%';
       arr[cPos.y+1][cPos.x-1] = ' ';
     }//up(--) & down(++)
   } else if(pos.x==cPos.x){
-    if(pos.y<cPos.y){
+    if(pos.y<cPos.y && checkCoin(cPos.y-1,cPos.x)){
       arr[--cPos.y][cPos.x] = '%';
       arr[cPos.y+1][cPos.x] = ' ';
-    } else {
+    } else if(checkCoin(cPos.y+1,cPos.x)){
       arr[++cPos.y][cPos.x] = '%';
       arr[cPos.y-1][cPos.x] = ' ';
     }//right(++) & left(--)
   } else if(pos.y == cPos.y) {
-    if(pos.x > cPos.x){
+    if(pos.x > cPos.x && checkCoin(cPos.y,cPos.x+1)){
       arr[cPos.y][++cPos.x] = '%';
       arr[cPos.y][cPos.x-1] = ' ';
-    } else {
+    } else if(checkCoin(cPos.y,cPos.x-1)){
       arr[cPos.y][--cPos.x] = '%';
       arr[cPos.y][cPos.x+1] = ' ';
     } 
   } else if(pos.y<cPos.y) {
-    if(pos.x<cPos.x){
+    if(pos.x<cPos.x && checkCoin(cPos.y-1,cPos.x-1)){
       arr[--cPos.y][--cPos.x] = '%';
       arr[cPos.y+1][cPos.x+1] = ' ';
-    } else {
+    } else if(checkCoin(cPos.y-1,cPos.x+1)){
       arr[--cPos.y][++cPos.x] = '%';
       arr[cPos.y+1][cPos.x-1] = ' ';
     }
   } else if(pos.y > cPos.y) {
-    if(pos.x<cPos.x){
+    if(pos.x<cPos.x && checkCoin(cPos.y+1,cPos.x-1)){
         arr[++cPos.y][--cPos.x] = '%';
         arr[cPos.y-1][cPos.x+1] = ' ';
-     } else {
+     } else if(checkCoin(cPos.y+1,cPos.x+1)){
        arr[++cPos.y][++cPos.x] = '%';
        arr[cPos.y-1][cPos.x-1] = ' ';
       }
@@ -273,4 +279,13 @@ void update(){
         break;
     }
   }
+}
+
+bool checkCoin(int yCoord, int xCoord){
+  std::pair<int,int> coords(yCoord,xCoord);
+  for(const auto& pair : coinsCoord){
+    if(pair == coords)
+      return false;
+  }
+  return true;
 }

@@ -32,7 +32,7 @@ game:
     goto game;
 
 
-  std::cout<<std::endl<<"Program Complete!";
+  std::cout<<std::endl<<"Program Complete!\n";
 
   return 0;
 }
