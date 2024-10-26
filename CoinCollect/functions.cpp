@@ -8,7 +8,7 @@
 #include<utility>
 #include"function.hpp"
 
-//vector with std::pair to store the possition of the coins to then compare with the position of the chaser... to block it or not
+//vector with std::pair to store the position of the coins to then compare with the position of the chaser... to block it or not
 
   char arr[20][50];
   char ch;
@@ -80,6 +80,7 @@ void MainGame(){
   init_pair(5,82,COLOR_BLACK);
 
   std::thread chaser(update);
+  //std::thread playerMove(directions,std::ref(ch));
 
   do{
 
@@ -157,6 +158,7 @@ ifBlank:
     goto ifBlank;
   }
 
+
   g_lock.lock();
        //Reset Blank
       for(int i=0;i<20;i++){     
@@ -172,6 +174,7 @@ ifBlank:
 }while(score<30 && !lostByChaser);
 
   gameRunning = false;
+  //playerMove.join();
   chaser.join();
 
 }
@@ -268,7 +271,6 @@ void update(){
 
     move(0,0);
     refresh();
-
     displayGrid();
 
       if(pos.x == cPos.x && pos.y == cPos.y){
@@ -276,6 +278,7 @@ void update(){
         clear();
         refresh();
         displayGrid();
+        
         break;
     }
   }
@@ -288,4 +291,8 @@ bool checkCoin(int yCoord, int xCoord){
       return false;
   }
   return true;
+}
+
+void directions(char& ch){
+  ch = getch();
 }
