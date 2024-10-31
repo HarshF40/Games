@@ -37,33 +37,40 @@ unsigned int genCoinCol(){
 }
 
 void displayGrid(){
-  refresh();
- for(int i=0;i<20;i++){
-  printw("\n");
-    for(int j=0;j<50;j++){
-      if(arr[i][j]=='@'){
-          attron(COLOR_PAIR(5));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(5));
-        } else if(arr[i][j] == '$'){
-          attron(COLOR_PAIR(3));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(3));
-        } else if(arr[i][j] == '#'){
-          attron(COLOR_PAIR(4));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(4));
-        } else if(arr[i][j] == '%') {
-          attron(COLOR_PAIR(1));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(1));
-        } else {
-          attron(COLOR_PAIR(2));
-          printw("%2c",arr[i][j]);
-          attroff(COLOR_PAIR(2));
+  while(gameRunning){
+    g_lock.lock();
+    clear();
+    for(int i=0;i<20;i++){
+      printw("\n");
+        for(int j=0;j<50;j++){
+          if(arr[i][j]=='@'){
+              attron(COLOR_PAIR(5));
+              printw("%2c",arr[i][j]);
+              attroff(COLOR_PAIR(5));
+            } else if(arr[i][j] == '$'){
+              attron(COLOR_PAIR(3));
+              printw("%2c",arr[i][j]);
+              attroff(COLOR_PAIR(3));
+            } else if(arr[i][j] == '#'){
+              attron(COLOR_PAIR(4));
+              printw("%2c",arr[i][j]);
+              attroff(COLOR_PAIR(4));
+            } else if(arr[i][j] == '%') {
+              attron(COLOR_PAIR(1));
+              printw("%2c",arr[i][j]);
+              attroff(COLOR_PAIR(1));
+            } else {
+              attron(COLOR_PAIR(2));
+              printw("%2c",arr[i][j]);
+              attroff(COLOR_PAIR(2));
+          }
+        }
       }
-    }
-  } 
+      g_lock.unlock();
+      //refresh();
+      std::this_thread::sleep_for(std::chrono::milliseconds(17)); 
+      refresh();
+  }
 }
 
 void MainGame(){
@@ -73,6 +80,9 @@ void MainGame(){
   int score = 0;
 
   start_color();
+  cbreak(); // Disable line buffering
+  noecho(); // Don't echo input characters
+  keypad(stdscr, TRUE); // Enable special keys
   init_pair(1,196,COLOR_BLACK);
   init_pair(2,33,COLOR_BLACK);
   init_pair(3,226,COLOR_BLACK);
@@ -80,7 +90,8 @@ void MainGame(){
   init_pair(5,82,COLOR_BLACK);
 
   std::thread chaser(update);
-  //std::thread playerMove(directions,std::ref(ch));
+  std::thread move(directions,std::ref(ch));
+  std::thread disp(displayGrid);
 
   do{
 
@@ -101,14 +112,13 @@ void MainGame(){
 
 ifBlank: 
 
-    clear();
-    refresh();
-
-    displayGrid(); 
+    //clear();
+    //refresh();
+    //displayGrid(); 
 
     printw("\nScore: %d/30\n",score);
-    ch = getch();
-  
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
   UP{
 
     if(((pos.y)>0) && (arr[(pos.y)-1][(pos.x)]!='#')){
@@ -174,8 +184,9 @@ ifBlank:
 }while(score<30 && !lostByChaser);
 
   gameRunning = false;
-  //playerMove.join();
+  move.join();
   chaser.join();
+  disp.join();
 
 }
 
@@ -294,5 +305,10 @@ bool checkCoin(int yCoord, int xCoord){
 }
 
 void directions(char& ch){
-  ch = getch();
+  while(gameRunning) {
+    //clear();
+    //refresh();
+    //displayGrid(); 
+    ch = getch();
+  }
 }
