@@ -31,5 +31,6 @@ void update();
 void moveChaser();
 void displayGrid();
 bool checkCoin(int,int);
+void directions(char&);
 
 #endif
